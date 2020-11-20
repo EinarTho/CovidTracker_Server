@@ -17,4 +17,8 @@ router.get('/employees', (req, res) => {
   controllers.getAllUsers(res);
 });
 
+router.post('/employees/positivetest', (req, res) => {
+  controlleres.registerPositiveTest(req, res);
+});
+
 module.exports = router;
