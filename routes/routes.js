@@ -17,7 +17,7 @@ router.get('/employees', (req, res) => {
   controllers.getAllUsers(res);
 });
 
-router.post('/addvisitedroom', (req, res) => {
+router.post('/employees/addvisitedroom', (req, res) => {
   controllers.addVisitedRoom(req, res);
 });
 

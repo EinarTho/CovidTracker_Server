@@ -29,7 +29,6 @@ const employee = new Schema({
 const room = new Schema({
   id: { type: Number, require: true },
   name: { type: String, required: true }, //add an array here for custom message?
-  visiters: Array,
 });
 
 const employeeModel = mongoose.model('Employee', employee);

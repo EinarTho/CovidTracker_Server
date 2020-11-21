@@ -25,35 +25,49 @@ const getUser = (req, res) => {
   });
 };
 
+//what if a matching room is added after positive corona test?
 const addVisitedRoom = (req, res) => {
-  //this is going to be a post request with both a user id as well as a room id
-  //is there a better way?
-  //if corona, you will look at all the rooms that that person visited
-  //the person id will be added to a list in the releevant room
-  //all the the people in a room where the id is present will be warned.
-  //dont actually think there needs to be a list of all the rooms the individual visited?
-  //maybe I do. Perhaps its easier to do warning that way
-  //this request needs employeeId, room, roomId - dont actullally need all three of these,
-  //but will it actually be easier?
   db.employeeModel.findOne({ id: req.body.employeeId }, (err, employee) => {
     if (err) return res.send(err);
     if (!employee) return res.send('no employee with that id!');
-    employee.roomsVisited.push(req.body.room);
+    employee.roomsVisited.push({
+      room: req.body.room,
+      date: new Date().toDateString(),
+    });
     employee.save(err => {
       if (err) return res.send(err);
+      return res.send(
+        'Room added to employee with the following id: ' + req.body.employeeId
+      );
     });
   });
+};
 
-  db.roomModel.findOne({ id: req.body.roomId }, (err, room) => {
+const registerPositiveTest = (req, res) => {
+  db.employeeModel.find({}, (err, employees) => {
     if (err) return res.send(err);
-    if (!room) return res.send('no room with that id!');
-    room.visiters.push(req.body.employeeId);
-    room.save(err => {
-      if (err) return res.send(err);
-    });
-    return res.send('updated room entry');
+    db.employeeModel.findOne(
+      { id: req.body.employeeId },
+      (error, infectedEmployee) => {
+        if (error) return res.send(error);
+        const employeesInRisk = employees.filter(emp => {
+          findMatchingEntries(emp.roomsVisited, infectedEmployee.roomsVisited);
+        });
+        res.send(employeesInRisk);
+      }
+    );
   });
-  //this is not very dry.? or maybe its fine-.
+};
+
+const findMatchingEntries = (arr1, arr2) => {
+  for (let i = 0; i < arr1.length; i++) {
+    for (let j = 0; j < arr2.length; j++) {
+      if (arr1[i] === arr2[j]) {
+        return true;
+      }
+    }
+  }
+  return false;
 };
 
 const registerNewRoom = (req, res) => {
@@ -69,11 +83,6 @@ const getAllRooms = (req, res) => {
     if (err) return res.send(err);
     return res.send(rooms);
   });
-};
-
-const registerPositiveTest = (req, res) => {
-  //id of employee with positive test here
-  //should return a list of everyone who was in contact.
 };
 
 module.exports = {
