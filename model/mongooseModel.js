@@ -19,12 +19,18 @@ const connect = (password, dbName) => {
 
 //rooms visited will be an array of objects containing the room + time and date?
 
-const employee = new Schema({
-  id: { type: Number, required: true },
-  name: { type: String, required: true },
-  roomsVisited: Array,
-  inRisk: Boolean,
-});
+const employee = new Schema(
+  {
+    id: { type: Number, required: true },
+    name: { type: String, required: true },
+    password: { type: String, required: true },
+    roomsVisited: Array,
+    inRisk: Boolean,
+  },
+  { timestamps: true, collection: 'Employee' }
+);
+
+//figure out presicely what timestanps and collection does.
 
 //visiters will be and object per day, stored in an array,
 const room = new Schema({
