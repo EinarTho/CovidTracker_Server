@@ -33,23 +33,42 @@ const addVisitedRoom = (req, res) => {
   //all the the people in a room where the id is present will be warned.
   //dont actually think there needs to be a list of all the rooms the individual visited?
   //maybe I do. Perhaps its easier to do warning that way
-  db.employeeModel.find({ id: req.body.employeeId }, (err, employee) => {
+  //this request needs employeeId, room, roomId - dont actullally need all three of these,
+  //but will it actually be easier?
+  db.employeeModel.findOne({ id: req.body.employeeId }, (err, employee) => {
     if (err) return res.send(err);
-    employee.roomsVisited.push(req.body.roomId);
+    if (!employee) return res.send('no employee with that id!');
+    employee.roomsVisited.push(req.body.room);
     employee.save(err => {
       if (err) return res.send(err);
     });
   });
 
-  db.roomModel.find({ id: req.body.roomId }, (err, room) => {
+  db.roomModel.findOne({ id: req.body.roomId }, (err, room) => {
     if (err) return res.send(err);
-    room.visiters.push(req.employeeId);
+    if (!room) return res.send('no room with that id!');
+    room.visiters.push(req.body.employeeId);
     room.save(err => {
       if (err) return res.send(err);
     });
     return res.send('updated room entry');
   });
   //this is not very dry.? or maybe its fine-.
+};
+
+const registerNewRoom = (req, res) => {
+  const newRoom = new db.roomModel(req.body);
+  newRoom.save(err => {
+    if (err) return res.send(err);
+    return res.send('Room added');
+  });
+};
+
+const getAllRooms = (req, res) => {
+  db.roomModel.find({}, (err, rooms) => {
+    if (err) return res.send(err);
+    return res.send(rooms);
+  });
 };
 
 const registerPositiveTest = (req, res) => {
@@ -63,4 +82,6 @@ module.exports = {
   getUser,
   addVisitedRoom,
   registerPositiveTest,
+  registerNewRoom,
+  getAllRooms,
 };

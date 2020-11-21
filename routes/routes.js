@@ -17,8 +17,20 @@ router.get('/employees', (req, res) => {
   controllers.getAllUsers(res);
 });
 
+router.post('/addvisitedroom', (req, res) => {
+  controllers.addVisitedRoom(req, res);
+});
+
 router.post('/employees/positivetest', (req, res) => {
   controlleres.registerPositiveTest(req, res);
+});
+
+router.post('/registerroom', (req, res) => {
+  controllers.registerNewRoom(req, res);
+});
+
+router.get('/rooms', (req, res) => {
+  controllers.getAllRooms(req, res);
 });
 
 module.exports = router;
