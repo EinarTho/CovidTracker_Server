@@ -23,6 +23,7 @@ const employee = new Schema({
   id: { type: Number, required: true },
   name: { type: String, required: true },
   roomsVisited: Array,
+  inRisk: Boolean,
 });
 
 //visiters will be and object per day, stored in an array,

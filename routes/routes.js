@@ -22,7 +22,7 @@ router.post('/employees/addvisitedroom', (req, res) => {
 });
 
 router.post('/employees/positivetest', (req, res) => {
-  controlleres.registerPositiveTest(req, res);
+  controllers.registerPositiveTest(req, res);
 });
 
 router.post('/registerroom', (req, res) => {

@@ -51,7 +51,12 @@ const registerPositiveTest = (req, res) => {
       (error, infectedEmployee) => {
         if (error) return res.send(error);
         const employeesInRisk = employees.filter(emp => {
-          findMatchingEntries(emp.roomsVisited, infectedEmployee.roomsVisited);
+          return (
+            findMatchingEntries(
+              emp.roomsVisited,
+              infectedEmployee.roomsVisited
+            ) && emp.id !== infectedEmployee.id
+          );
         });
         res.send(employeesInRisk);
       }
@@ -62,7 +67,9 @@ const registerPositiveTest = (req, res) => {
 const findMatchingEntries = (arr1, arr2) => {
   for (let i = 0; i < arr1.length; i++) {
     for (let j = 0; j < arr2.length; j++) {
-      if (arr1[i] === arr2[j]) {
+      console.log(arr1[i].room, arr2[j].room);
+      if (arr1[i].room === arr2[j].room && arr1[i].date === arr2[j].date) {
+        console.log('inside if');
         return true;
       }
     }
