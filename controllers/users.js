@@ -1,5 +1,7 @@
 const db = require('../model/mongooseModel');
 
+//name of this file should be  changed - feks users
+
 const registerNewUser = (req, res) => {
   const entry = new db.employeeModel(req.body);
   entry.save(err => {
@@ -8,7 +10,7 @@ const registerNewUser = (req, res) => {
   });
 };
 
-const getAllUsers = res => {
+const getAllUsers = (req, res) => {
   db.employeeModel.find({}, (err, employees) => {
     res.send(employees);
   });
