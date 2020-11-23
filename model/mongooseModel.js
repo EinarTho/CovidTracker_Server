@@ -22,6 +22,8 @@ const connect = (password, dbName) => {
 const employee = new Schema({
   id: { type: Number, required: true },
   name: { type: String, required: true },
+  password: { type: String, required: true },
+  email: { type: String, required: true },
   roomsVisited: Array,
   inRisk: Boolean,
 });

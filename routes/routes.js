@@ -1,5 +1,4 @@
 const express = require('express');
-const { reset } = require('nodemon');
 const router = express.Router();
 const controllers = require('../controllers/controllers.js');
 

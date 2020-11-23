@@ -25,6 +25,20 @@ const getUser = (req, res) => {
   });
 };
 
+// Employee.updateOne(
+//   { personId: personId },
+//   { $addToSet: { visits: newVisits } },
+//   (err, result) => {
+//     if (err) {
+//       console.log(err);
+//       res.end(err);
+//     } else {
+//       console.log(result);
+//       res.end(JSON.stringify(newVisits));
+//     }
+//   }
+// );
+
 //what if a matching room is added after positive corona test?
 const addVisitedRoom = (req, res) => {
   db.employeeModel.findOne({ id: req.body.employeeId }, (err, employee) => {
