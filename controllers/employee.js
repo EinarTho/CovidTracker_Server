@@ -1,16 +1,11 @@
 const db = require('../model/mongooseModel');
+const utils = require('../utils/employee');
 
 const registerNewUser = (req, res) => {
   const entry = new db.employeeModel(req.body);
   entry.save(err => {
     if (err) return res.send(err);
     return res.send('Registered!');
-  });
-};
-
-const getAllUsers = res => {
-  db.employeeModel.find({}, (err, employees) => {
-    res.send(employees);
   });
 };
 
@@ -25,19 +20,19 @@ const getUser = (req, res) => {
   });
 };
 
-// Employee.updateOne(
-//   { personId: personId },
-//   { $addToSet: { visits: newVisits } },
-//   (err, result) => {
-//     if (err) {
-//       console.log(err);
-//       res.end(err);
-//     } else {
-//       console.log(result);
-//       res.end(JSON.stringify(newVisits));
-//     }
-//   }
-// );
+const deleteUser = (req, res) => {
+  db.employeeModel.deleteOne({ id: req.body.id }, (err, employee) => {
+    if (err) return res.send(err);
+    if (!employee) return res.send('no employee with that id!');
+    return res.send('Deleted user with id: ' + req.body.id);
+  });
+};
+
+const getAllUsers = res => {
+  db.employeeModel.find({}, (err, employees) => {
+    res.send(employees);
+  });
+};
 
 //what if a matching room is added after positive corona test?
 const addVisitedRoom = (req, res) => {
@@ -47,6 +42,7 @@ const addVisitedRoom = (req, res) => {
     employee.roomsVisited.push({
       room: req.body.room,
       date: new Date().toDateString(),
+      time: new Date().getHours() + new Date().getSeconds() / 60,
     });
     employee.save(err => {
       if (err) return res.send(err);
@@ -54,6 +50,14 @@ const addVisitedRoom = (req, res) => {
         'Room added to employee with the following id: ' + req.body.employeeId
       );
     });
+  });
+};
+
+const getVisitedRooms = (req, res) => {
+  db.employeeModel.findOne({ id: req.body.employeeId }, (err, employee) => {
+    if (err) return res.send(err);
+    if (!employee) return res.send('no employee with that id!');
+    res.send(employee.roomsVisited);
   });
 };
 
@@ -66,7 +70,7 @@ const registerPositiveTest = (req, res) => {
         if (error) return res.send(error);
         const employeesInRisk = employees.filter(emp => {
           return (
-            findMatchingEntries(
+            utils.findMatchingEntries(
               emp.roomsVisited,
               infectedEmployee.roomsVisited
             ) && emp.id !== infectedEmployee.id
@@ -78,40 +82,12 @@ const registerPositiveTest = (req, res) => {
   });
 };
 
-const findMatchingEntries = (arr1, arr2) => {
-  for (let i = 0; i < arr1.length; i++) {
-    for (let j = 0; j < arr2.length; j++) {
-      console.log(arr1[i].room, arr2[j].room);
-      if (arr1[i].room === arr2[j].room && arr1[i].date === arr2[j].date) {
-        console.log('inside if');
-        return true;
-      }
-    }
-  }
-  return false;
-};
-
-const registerNewRoom = (req, res) => {
-  const newRoom = new db.roomModel(req.body);
-  newRoom.save(err => {
-    if (err) return res.send(err);
-    return res.send('Room added');
-  });
-};
-
-const getAllRooms = (req, res) => {
-  db.roomModel.find({}, (err, rooms) => {
-    if (err) return res.send(err);
-    return res.send(rooms);
-  });
-};
-
 module.exports = {
+  deleteUser,
   registerNewUser,
   getAllUsers,
   getUser,
   addVisitedRoom,
   registerPositiveTest,
-  registerNewRoom,
-  getAllRooms,
+  getVisitedRooms,
 };

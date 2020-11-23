@@ -16,6 +16,10 @@ router.get('/employees', (req, res) => {
   controllers.getAllUsers(res);
 });
 
+router.delete('/employees', (req, res) => {
+  controllers.delete(req, res);
+});
+
 router.post('/employees/addvisitedroom', (req, res) => {
   controllers.addVisitedRoom(req, res);
 });

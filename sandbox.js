@@ -9,3 +9,6 @@ const findMatchingEntries = (arr1, arr2) => {
   return false;
 };
 console.log(findMatchingEntries([1, 2], [1, 4]));
+console.log(new Date().getHours() + new Date().getMinutes() / 60);
+
+module.exports.findMatchingEntries = findMatchingEntries;
