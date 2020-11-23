@@ -10,3 +10,4 @@ const findMatchingEntries = (arr1, arr2) => {
   }
   return false;
 };
+module.exports = findMatchingEntries;

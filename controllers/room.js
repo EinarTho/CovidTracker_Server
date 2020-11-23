@@ -1,7 +1,7 @@
-const db = require('../model/mongooseModel');
+const Room = require('../model/room');
 
 const registerNewRoom = (req, res) => {
-  const newRoom = new db.roomModel(req.body);
+  const newRoom = new Room(req.body);
   newRoom.save(err => {
     if (err) return res.send(err);
     return res.send('Room added');
@@ -9,20 +9,23 @@ const registerNewRoom = (req, res) => {
 };
 
 const getAllRooms = (req, res) => {
-  db.roomModel.find({}, (err, rooms) => {
+  Room.find({}, (err, rooms) => {
     if (err) return res.send(err);
     return res.send(rooms);
   });
 };
 
 const deleteRoom = (req, res) => {
-  db.roomModel.deleteOne({ name: req.body.id }, (err, room) => {
+  Room.deleteOne({ name: req.body.id }, (err, room) => {
     res.send(room);
   });
 };
+
+const updateRoom = (req, res) => {};
 
 module.exports = {
   registerNewRoom,
   getAllRooms,
   deleteRoom,
+  updateRoom,
 };
