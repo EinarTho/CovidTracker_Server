@@ -1,6 +1,6 @@
 const Room = require('../model/room');
 
-const registerNewRoom = (req, res) => {
+const createRoom = (req, res) => {
   const newRoom = new Room(req.body);
   newRoom.save(err => {
     if (err) return res.send(err);
@@ -24,7 +24,7 @@ const deleteRoom = (req, res) => {
 const updateRoom = (req, res) => {};
 
 module.exports = {
-  registerNewRoom,
+  createRoom,
   getAllRooms,
   deleteRoom,
   updateRoom,
