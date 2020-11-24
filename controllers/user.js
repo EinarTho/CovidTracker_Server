@@ -69,7 +69,7 @@ const registerPositiveTest = (req, res) => {
           emp.id !== infectedUser.id
         );
       });
-      res.send(usersInRisk);
+      return res.send(usersInRisk);
     });
   });
 };

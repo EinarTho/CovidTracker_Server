@@ -21,10 +21,11 @@ router.post('/users/login', userController.login);
 
 router.post('/rooms/registerroom', userController.addVisitedRoom);
 
-router.get('/rooms', roomController.getAllRooms);
-
-router.put('/rooms', roomController.updateRoom);
-
-router.delete('/rooms', roomController.deleteRoom);
+router
+  .route('/rooms')
+  .get(roomController.getAllRooms)
+  .post(roomController.createRoom)
+  .put(roomController.updateRoom)
+  .delete(roomController.deleteRoom);
 
 module.exports = router;
