@@ -9,7 +9,7 @@ router.get('/users/:id', userController.getUser);
 
 router.get('/users', userController.getAllUsers);
 
-router.delete('/users', userController.deleteUser);
+router.delete('/users/:id', userController.deleteUser);
 
 router.post('/users/addvisitedrooms', userController.addVisitedRoom);
 

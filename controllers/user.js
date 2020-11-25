@@ -6,29 +6,61 @@ const jwt = require('jsonwebtoken');
 const { validateCreateUser, validateLogin } = require('../utils/validateAuth');
 const { validatePassword } = require('../utils/validatePAssword');
 
-const getUser = (req, res) => {
-  console.log(req.params.id);
-  User.find({ id: req.params.id }, (err, employee) => {
-    if (employee.length > 0) {
-      res.send(employee);
-    } else {
-      res.send('No hits!');
+const getUser = async (req, res, next) => {
+  const {id} = req.params
+  try {
+    const user = await User.findById({_id: id})
+    if (!user) {
+      const err = new Error('User with this credential not found');
+      err.conde = 404;
+      throw err;
     }
-  });
+    res.status(200).send(user);
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
 
-const deleteUser = (req, res) => {
-  User.deleteOne({ id: req.body.id }, (err, user) => {
-    if (err) return res.send(err);
-    if (!user) return res.send('no employee with that id!');
-    return res.send('Deleted user with id: ' + req.body.id);
-  });
+const deleteUser = async (req, res, next) => {
+  const {id} = req.params;
+  const {password} = req.body;
+  console.log(req.body, req.params)
+  try {
+    const user = await User.findById({_id: id});
+    await validatePassword(password, user.password);
+    const deletedUser = await user.deleteOne();
+    res.status(204).send(deletedUser);
+  } catch (err) {
+    throw err;
+  }
+}
+
+const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find()
+    res.status(200).send(users);
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
 
-const getAllUsers = (req, res) => {
-  User.find({}, (err, employees) => {
-    res.send(employees);
-  });
+// no route for this
+const getVisitedRooms = async (req, res, next) => {
+  const {id} = req.body
+  try {
+    const user = await User.findById({_id: id})
+    if (!user) {
+      const err = new Error('User with this credential not found');
+      err.conde = 404;
+      throw err;
+    }
+    res.status(200).send(user.visits);
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
 
 //what if a matching room is added after positive corona test?
@@ -47,14 +79,6 @@ const addVisitedRoom = (req, res) => {
         'Room added to employee with the following id: ' + req.body.employeeId
       );
     });
-  });
-};
-
-const getVisitedRooms = (req, res) => {
-  User.findOne({ id: req.body.employeeId }, (err, employee) => {
-    if (err) return res.send(err);
-    if (!employee) return res.send('no employee with that id!');
-    res.send(employee.visits);
   });
 };
 
