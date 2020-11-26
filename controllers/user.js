@@ -7,7 +7,6 @@ const { validateCreateUser, validateLogin } = require('../utils/validateAuth');
 const { validatePassword } = require('../utils/validatePassword');
 
 const getUser = (req, res) => {
-  console.log(req.params.id);
   User.find({ _id: req.params.id }, (err, user) => {
     if (user) {
       console.log(user);
@@ -19,7 +18,6 @@ const getUser = (req, res) => {
 };
 
 const deleteUser = (req, res) => {
-  console.log(req.body.users);
   const usersToBeDeleted = JSON.parse(req.body.users);
   User.deleteMany(
     {
@@ -62,15 +60,6 @@ const addVisitedRooms = (req, res) => {
         .send('Room added to employee with the following id: ' + req.body._id);
     });
   });
-};
-
-const validateRoomArray = roomArray => {
-  for (let i = 0; i < roomArray.length; i++) {
-    if (!roomArray[i].date || !roomArray[i].time || !roomArray[i].id) {
-      return false;
-    }
-  }
-  return true;
 };
 
 const getVisitedRooms = (req, res) => {
@@ -188,6 +177,14 @@ const login = async (req, res, next) => {
   }
 };
 
+const validateRoomArray = roomArray => {
+  for (let i = 0; i < roomArray.length; i++) {
+    if (!roomArray[i].date || !roomArray[i].time || !roomArray[i].id) {
+      return false;
+    }
+  }
+  return true;
+};
 module.exports = {
   deleteUser,
   getAllUsers,
