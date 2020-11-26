@@ -7,6 +7,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    floor: {
+      type: Number,
+      required: true,
+    },
     lastName: {
       type: String,
       required: true,

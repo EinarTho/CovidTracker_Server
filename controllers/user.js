@@ -58,6 +58,8 @@ const getVisitedRooms = (req, res) => {
   });
 };
 
+const deleteVisitedRoom = (req, res) => {};
+
 const registerPositiveTest = (req, res) => {
   User.find({}, (err, users) => {
     if (err) return res.send(err);
@@ -138,4 +140,5 @@ module.exports = {
   getVisitedRooms,
   login,
   createUser,
+  deleteVisitedRoom,
 };

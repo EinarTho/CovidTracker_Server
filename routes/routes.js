@@ -5,27 +5,29 @@ const roomController = require('../controllers/room');
 
 //change to user everywhere
 
-router.get('/users/:id', userController.getUser);
-
 router.get('/users', userController.getAllUsers);
 
 router.delete('/users', userController.deleteUser);
 
-router.post('/users/addvisitedrooms', userController.addVisitedRoom);
+router.get('/users/:id', userController.getUser);
 
-router.post('/users/positivetest', userController.registerPositiveTest);
+router.put('/users/positivetest', userController.registerPositiveTest);
+
+router.put('/users/visitedrooms', userController.addVisitedRoom);
+
+router.delete('/users/visitedrooms', userController.deleteVisitedRoom);
+
+router.get('/users/visitedrooms', userController.getVisitedRooms);
 
 router.post('/users/register', userController.createUser);
 
 router.post('/users/login', userController.login);
 
-router.post('/rooms/registerroom', userController.addVisitedRoom);
-
 router
   .route('/rooms')
   .get(roomController.getAllRooms)
-  .post(roomController.createRoom)
-  .put(roomController.updateRoom)
-  .delete(roomController.deleteRoom);
+  .post(roomController.createRooms)
+  .put(roomController.updateRooms)
+  .delete(roomController.deleteRooms);
 
 module.exports = router;

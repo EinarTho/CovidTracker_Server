@@ -1,31 +1,52 @@
 const Room = require('../model/room');
 
-const createRoom = (req, res) => {
-  const newRoom = new Room(req.body);
-  newRoom.save(err => {
-    if (err) return res.send(err);
-    return res.send('Room added');
+//where do I check if the person is logged in? Must be in the request, if token is valid..
+
+const createRooms = (req, res) => {
+  if (!req.body.rooms) {
+    return res.status(415).send('Invalid content'); //is this the right statuscode?
+  }
+  const roomArray = req.body.rooms;
+  roomArray.forEach(room => {
+    const newRoom = new Room(room);
+    newRoom.save(err => {
+      if (err) return res.status(500).send(err);
+    });
   });
+  return res.status(200).send('Room added');
 };
 
 const getAllRooms = (req, res) => {
   Room.find({}, (err, rooms) => {
-    if (err) return res.send(err);
-    return res.send(rooms);
+    if (err) return res.status(500).send(err);
+    return res.status(200).send(rooms);
   });
 };
 
-const deleteRoom = (req, res) => {
-  Room.deleteOne({ name: req.body.id }, (err, room) => {
-    res.send(room);
+const deleteRooms = (req, res) => {
+  if (!req.body.rooms) return res.status(415).send('invalid content');
+  const roomsToBeUpdated = req.body.rooms;
+  roomsToBeUpdated.forEach(room => {
+    Room.deleteOne({ _id: room._id }, (err, room) => {
+      res.status(200).send(room);
+    });
   });
 };
 
-const updateRoom = (req, res) => {};
+//need more validation here
+const updateRooms = (req, res) => {
+  if (!req.body.rooms) return res.status(415).send('invalid content');
+  const roomsToBeUpdated = req.body.rooms;
+  roomsToBeUpdated.forEach(err, room => {
+    if (err) return res.status(500).send(err);
+    Room.findOneAndUpdate({ _id: room._id }, room);
+  });
+  res.status(200).send('updated room! :)');
+};
 
 module.exports = {
-  createRoom,
+  createRooms,
   getAllRooms,
-  deleteRoom,
-  updateRoom,
+  deleteRooms,
+  updateRooms,
 };
