@@ -1,14 +1,18 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const room = new Schema({
-  id: {
+  roomId: {
     type: Number,
     require: true
   },
   name: {
     type: String,
     required: true
-  }, //add an array here for custom message?
+  },
+  floor: {
+    type: String,
+    required: true
+  }
 });
 
 const roomModel = mongoose.model('Room', room);

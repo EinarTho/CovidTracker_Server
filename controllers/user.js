@@ -46,7 +46,7 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
-// no route for this
+// no route for this TODO UNUSED CONTROLLER
 const getVisitedRooms = async (req, res, next) => {
   const {id} = req.body
   try {
@@ -62,6 +62,8 @@ const getVisitedRooms = async (req, res, next) => {
     throw err;
   }
 };
+
+// START HERE REFACTOR
 
 //what if a matching room is added after positive corona test?
 const addVisitedRoom = (req, res) => {
