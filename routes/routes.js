@@ -13,9 +13,9 @@ router.get('/users/:id', userController.getUser);
 
 router.put('/users/positivetest', userController.registerPositiveTest);
 
-router.put('/users/visitedrooms', userController.addVisitedRoom);
+router.put('/users/visitedrooms', userController.addVisitedRooms);
 
-router.delete('/users/visitedrooms', userController.deleteVisitedRoom);
+router.delete('/users/visitedrooms', userController.deleteVisitedRooms);
 
 router.get('/users/visitedrooms', userController.getVisitedRooms);
 

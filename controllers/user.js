@@ -18,47 +18,74 @@ const getUser = (req, res) => {
 };
 
 const deleteUser = (req, res) => {
-  User.deleteOne({ id: req.body.id }, (err, user) => {
-    if (err) return res.send(err);
-    if (!user) return res.send('no employee with that id!');
-    return res.send('Deleted user with id: ' + req.body.id);
+  User.deleteOne({ _id: req.body.id }, (err, user) => {
+    if (!user) return res.status(400).send('no employee with that id!');
+    if (err) return res.status(500).send(err);
+    return res.status(200).send('Deleted user with id: ' + req.body.id);
   });
 };
 
 const getAllUsers = (req, res) => {
   User.find({}, (err, employees) => {
-    res.send(employees);
+    if (err) return res.status(500).send();
+    res.status(200).send(employees);
   });
 };
 
 //what if a matching room is added after positive corona test?
+//is there a problem in doing it like this?
 const addVisitedRoom = (req, res) => {
-  User.findOne({ id: req.body.employeeId }, (err, employee) => {
-    if (err) return res.send(err);
+  const roomsToBeAdded = JSON.parse(req.body.room);
+  if (!validateRoomArray(roomsToBeAdded)) {
+    return res.status(415).send('Rooms in wrong format');
+  }
+  User.findOne({ _id: req.body._id }, (err, employee) => {
+    if (err) return res.status(500).send(err);
     if (!employee) return res.send('no employee with that id!');
-    employee.visits.push({
-      room: req.body.room,
-      date: new Date().toDateString(),
-      time: new Date().getHours() + new Date().getSeconds() / 60,
-    });
+    employee.visits.push(...roomsToBeAdded);
     employee.save(err => {
       if (err) return res.send(err);
-      return res.send(
-        'Room added to employee with the following id: ' + req.body.employeeId
-      );
+      return res
+        .status(200)
+        .send(
+          'Room added to employee with the following id: ' + req.body.employeeId
+        );
     });
   });
+};
+
+const validateRoomArray = roomArray => {
+  for (let i = 0; i < roomArray.length; i++) {
+    if (!room.date || !room.time || !room.date || !room._id) {
+      return false;
+    }
+  }
+  return true;
 };
 
 const getVisitedRooms = (req, res) => {
-  User.findOne({ id: req.body.employeeId }, (err, employee) => {
-    if (err) return res.send(err);
-    if (!employee) return res.send('no employee with that id!');
-    res.send(employee.visits);
+  User.findOne({ _id: req.body._id }, (err, user) => {
+    if (err) return res.status(500).send(err);
+    if (!user) return res.status(400).send('no user with that id!');
+    res.status(200).send(user.visits);
   });
 };
 
-const deleteVisitedRoom = (req, res) => {};
+//red flag at the way in which I filter
+const deleteVisitedRooms = (req, res) => {
+  const roomsToBeDeleted = req.body.rooms;
+  User.findOne({ _id: req.body._id }, (err, user) => {
+    if (err) return res.status(500).send(err);
+    if (!user) return res.status(400).send('No user with the provided id');
+    const filteredRooms = user.visits.filter(
+      room => !roomsToBeDeleted.includes(room._id)
+    );
+    user.visits = filteredRooms;
+    user.save(err => {
+      if (err) return res.status(500).send();
+    });
+  });
+};
 
 const registerPositiveTest = (req, res) => {
   User.find({}, (err, users) => {
@@ -70,6 +97,11 @@ const registerPositiveTest = (req, res) => {
           findMatchingEntries(emp.visits, infectedUser.visits) &&
           emp.id !== infectedUser.id
         );
+      });
+      User.updateMany({
+        _id: {
+          $in: usersToBeWarned,
+        },
       });
       return res.send(usersInRisk);
     });
@@ -140,5 +172,5 @@ module.exports = {
   getVisitedRooms,
   login,
   createUser,
-  deleteVisitedRoom,
+  deleteVisitedRooms,
 };
