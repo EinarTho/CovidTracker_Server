@@ -4,13 +4,14 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const { validateCreateUser, validateLogin } = require('../utils/validateAuth');
-const { validatePassword } = require('../utils/validatePAssword');
+const { validatePassword } = require('../utils/validatePassword');
 
 const getUser = (req, res) => {
   console.log(req.params.id);
-  User.find({ id: req.params.id }, (err, employee) => {
-    if (employee.length > 0) {
-      res.send(employee);
+  User.find({ _id: req.params.id }, (err, user) => {
+    if (user) {
+      console.log(user);
+      res.send(user);
     } else {
       res.send('No hits!');
     }
@@ -18,11 +19,19 @@ const getUser = (req, res) => {
 };
 
 const deleteUser = (req, res) => {
-  User.deleteOne({ _id: req.body.id }, (err, user) => {
-    if (!user) return res.status(400).send('no employee with that id!');
-    if (err) return res.status(500).send(err);
-    return res.status(200).send('Deleted user with id: ' + req.body.id);
-  });
+  console.log(req.body.users);
+  const usersToBeDeleted = JSON.parse(req.body.users);
+  User.deleteMany(
+    {
+      _id: {
+        $in: usersToBeDeleted,
+      },
+    },
+    err => {
+      if (err) return res.status(415).send(err);
+    }
+  );
+  res.status(200).send('Deleted users with the ids: ' + req.body.users);
 };
 
 const getAllUsers = (req, res) => {
@@ -34,8 +43,11 @@ const getAllUsers = (req, res) => {
 
 //what if a matching room is added after positive corona test?
 //is there a problem in doing it like this?
-const addVisitedRoom = (req, res) => {
-  const roomsToBeAdded = JSON.parse(req.body.room);
+//maybe more validation here
+//need validation that room id exists
+const addVisitedRooms = (req, res) => {
+  const roomsToBeAdded = JSON.parse(req.body.rooms);
+  console.log(roomsToBeAdded);
   if (!validateRoomArray(roomsToBeAdded)) {
     return res.status(415).send('Rooms in wrong format');
   }
@@ -47,16 +59,14 @@ const addVisitedRoom = (req, res) => {
       if (err) return res.send(err);
       return res
         .status(200)
-        .send(
-          'Room added to employee with the following id: ' + req.body.employeeId
-        );
+        .send('Room added to employee with the following id: ' + req.body._id);
     });
   });
 };
 
 const validateRoomArray = roomArray => {
   for (let i = 0; i < roomArray.length; i++) {
-    if (!room.date || !room.time || !room.date || !room._id) {
+    if (!roomArray[i].date || !roomArray[i].time || !roomArray[i].id) {
       return false;
     }
   }
@@ -78,13 +88,15 @@ const deleteVisitedRooms = (req, res) => {
     if (err) return res.status(500).send(err);
     if (!user) return res.status(400).send('No user with the provided id');
     const filteredRooms = user.visits.filter(
-      room => !roomsToBeDeleted.includes(room._id)
+      room => !roomsToBeDeleted.includes(room.id)
     );
     user.visits = filteredRooms;
+    console.log(user);
     user.save(err => {
       if (err) return res.status(500).send();
     });
   });
+  res.status(200).send('you deleted some rooms');
 };
 
 const registerPositiveTest = (req, res) => {
@@ -94,22 +106,33 @@ const registerPositiveTest = (req, res) => {
       if (error) return res.send(error);
       const usersInRisk = users.filter(emp => {
         return (
-          findMatchingEntries(emp.visits, infectedUser.visits) &&
-          emp.id !== infectedUser.id
+          findMatchingEntries(
+            JSON.parse(JSON.stringify(emp.visits)),
+            JSON.parse(JSON.stringify(infectedUser.visits))
+          ) && emp.id !== infectedUser.id
         );
       });
-      User.updateMany({
-        _id: {
-          $in: usersToBeWarned,
+      console.log(usersInRisk);
+      const usersToBeWarned = usersInRisk.map(user => user._id);
+      console.log(usersToBeWarned);
+      User.updateMany(
+        {
+          _id: {
+            $in: usersToBeWarned,
+          },
         },
-      });
-      return res.send(usersInRisk);
+        { inRisk: true },
+        err => {
+          if (err) return res.status(500).send(err);
+          return res.send(usersInRisk);
+        }
+      );
     });
   });
 };
 
 const createUser = async (req, res, next) => {
-  const { email, firstName, lastName, password, companyId } = req.body;
+  const { email, firstName, lastName, password, companyId, floor } = req.body;
   validateCreateUser(req.body);
 
   try {
@@ -117,7 +140,7 @@ const createUser = async (req, res, next) => {
     if (userExist) {
       const err = new Error('User already exists.');
       err.code = 400;
-      throw err;
+      res.status(400).send(err);
     }
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = new User({
@@ -126,12 +149,14 @@ const createUser = async (req, res, next) => {
       email,
       password: hashedPassword,
       companyId,
+      floor,
     });
     const savedUser = await user.save();
     res.status(200).send(savedUser);
   } catch (err) {
     console.error(err);
-    throw err;
+    err.code = 400;
+    res.status(400).send(err);
   }
 };
 
@@ -167,7 +192,7 @@ module.exports = {
   deleteUser,
   getAllUsers,
   getUser,
-  addVisitedRoom,
+  addVisitedRooms,
   registerPositiveTest,
   getVisitedRooms,
   login,

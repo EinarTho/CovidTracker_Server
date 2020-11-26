@@ -9,19 +9,19 @@ router.get('/users', userController.getAllUsers);
 
 router.delete('/users', userController.deleteUser);
 
-router.get('/users/:id', userController.getUser);
-
 router.put('/users/positivetest', userController.registerPositiveTest);
 
 router.put('/users/visitedrooms', userController.addVisitedRooms);
 
-router.delete('/users/visitedrooms', userController.deleteVisitedRooms);
-
 router.get('/users/visitedrooms', userController.getVisitedRooms);
+
+router.delete('/users/visitedrooms', userController.deleteVisitedRooms);
 
 router.post('/users/register', userController.createUser);
 
 router.post('/users/login', userController.login);
+
+router.get('/users/:id', userController.getUser);
 
 router
   .route('/rooms')
