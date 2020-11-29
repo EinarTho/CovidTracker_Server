@@ -7,6 +7,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    floor: {
+      type: Number,
+      required: true,
+    },
     lastName: {
       type: String,
       required: true,
@@ -30,6 +34,18 @@ const userSchema = new Schema(
     inRisk: {
       type: Boolean,
       default: false,
+    },
+    role: {
+      type: String,
+      default: 'basic',
+      enum: ['basic', 'admin'],
+    },
+    accessToken: {
+      type: String,
+    },
+    role: {
+      type: String,
+      required: true,
     },
   },
   { timestamps: true }

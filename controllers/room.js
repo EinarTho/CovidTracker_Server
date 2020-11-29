@@ -1,31 +1,68 @@
 const Room = require('../model/room');
+const roomArrayValidator = require('../utils/roomArrayValidator');
 
-const createRoom = (req, res) => {
-  const newRoom = new Room(req.body);
-  newRoom.save(err => {
-    if (err) return res.send(err);
-    return res.send('Room added');
-  });
+//where do to check if the person is logged in? Must be in the request, if token is valid..
+//need a validator for content
+
+const createRooms = async (req, res) => {
+  try {
+    const roomArray = JSON.parse(req.body.rooms);
+    if (!roomArrayValidator(roomArray)) {
+      return res.status(415).send('One of the rooms are in the wrong format');
+    }
+    await Room.insertMany(roomArray);
+    return res.status(200).send('rooms added');
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
 };
 
-const getAllRooms = (req, res) => {
-  Room.find({}, (err, rooms) => {
-    if (err) return res.send(err);
-    return res.send(rooms);
-  });
+const getAllRooms = async (req, res) => {
+  try {
+    const allRooms = await Room.find({});
+    return res.status(200).send(allRooms);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
 };
 
-const deleteRoom = (req, res) => {
-  Room.deleteOne({ name: req.body.id }, (err, room) => {
-    res.send(room);
-  });
+const deleteRooms = async (req, res) => {
+  try {
+    const roomsToBeDeleted = JSON.parse(req.body.rooms); //validation - check if the rooms exist
+    await Room.deleteMany({
+      _id: {
+        $in: roomsToBeDeleted,
+      },
+    });
+    res.status(200).send('deleted');
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
 };
 
-const updateRoom = (req, res) => {};
+//need more validation here
+//is doing it like this problematic?
+const updateRooms = async (req, res) => {
+  try {
+    const roomsToBeUpdated = JSON.parse(req.body.rooms);
+    if (!roomArrayValidator(roomsToBeUpdated)) {
+      return res.status(415).send('invalid content');
+    }
+    for (let i = 0; i < roomsToBeUpdated.length; i++) {
+      await Room.findOneAndUpdate(
+        { _id: roomsToBeUpdated[i]._id },
+        roomsToBeUpdated[i]
+      );
+    }
+    res.status(200).send('updated rooms! :)');
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+};
 
 module.exports = {
-  createRoom,
+  createRooms,
   getAllRooms,
-  deleteRoom,
-  updateRoom,
+  deleteRooms,
+  updateRooms,
 };
