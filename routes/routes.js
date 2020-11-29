@@ -12,7 +12,12 @@ router.get(
   userController.getAllUsers
 );
 
-router.delete('/users', userController.deleteUser);
+router.delete(
+  '/users',
+  userController.allowIfLoggedin,
+  userController.grantAccess('deleteAny', 'profile'),
+  userController.deleteUser
+);
 
 router.put('/users/positivetest', userController.registerPositiveTest);
 
@@ -30,7 +35,12 @@ router.get(
   userController.getVisitedRooms
 );
 
-router.delete('/users/visitedrooms', userController.deleteVisitedRooms);
+router.delete(
+  '/users/visitedrooms',
+  userController.allowIfLoggedin,
+  userController.grantAccess('updateAny', 'profile'),
+  userController.deleteVisitedRooms
+);
 
 router.post('/users/register', userController.createUser);
 
