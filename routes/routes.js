@@ -5,15 +5,30 @@ const roomController = require('../controllers/room');
 
 //change to user everywhere
 
-router.get('/users', userController.getAllUsers);
+router.get(
+  '/users',
+  userController.allowIfLoggedin,
+  userController.grantAccess('readAny', 'profile'),
+  userController.getAllUsers
+);
 
 router.delete('/users', userController.deleteUser);
 
 router.put('/users/positivetest', userController.registerPositiveTest);
 
-router.put('/users/visitedrooms', userController.addVisitedRooms);
+router.put(
+  '/users/visitedrooms',
+  userController.allowIfLoggedin,
+  userController.grantAccess('updateAny', 'profile'),
+  userController.addVisitedRooms
+);
 
-router.get('/users/visitedrooms', userController.getVisitedRooms);
+router.get(
+  '/users/visitedrooms',
+  userController.allowIfLoggedin,
+  userController.grantAccess('readAny', 'profile'),
+  userController.getVisitedRooms
+);
 
 router.delete('/users/visitedrooms', userController.deleteVisitedRooms);
 
@@ -21,7 +36,11 @@ router.post('/users/register', userController.createUser);
 
 router.post('/users/login', userController.login);
 
-router.get('/users/:id', userController.getUser);
+router.get(
+  '/users/:id',
+  userController.allowIfLoggedin,
+  userController.getUser
+);
 
 router
   .route('/rooms')

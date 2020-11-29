@@ -28,7 +28,7 @@ const getAllRooms = async (req, res) => {
 
 const deleteRooms = async (req, res) => {
   try {
-    const roomsToBeDeleted = JSON.parse(req.body.rooms);
+    const roomsToBeDeleted = JSON.parse(req.body.rooms); //validation - check if the rooms exist
     await Room.deleteMany({
       _id: {
         $in: roomsToBeDeleted,

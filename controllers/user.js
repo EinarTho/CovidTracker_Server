@@ -4,14 +4,13 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const validateRoomArray = require('../utils/validateRoomArray');
 
-const { validateCreateUser, validateLogin } = require('../utils/validateAuth');
-const { validatePassword } = require('../utils/validatePassword');
-
+//change it to the body
 const getUser = async (req, res) => {
   try {
     const user = await User.find({ _id: req.params.id });
     res.status(200).send(user);
   } catch (e) {
+    //do validation in try
     res.status(400).send(e.message);
   }
 };
@@ -26,7 +25,7 @@ const deleteUser = async (req, res) => {
     });
     res.status(200).send('Deleted users with the ids: ' + req.body.users);
   } catch (e) {
-    res.status(400).send(e.message);
+    res.status(500).send(e.message);
   }
 };
 
@@ -118,60 +117,105 @@ const registerPositiveTest = async (req, res) => {
   }
 };
 
-const createUser = async (req, res, next) => {
-  const { email, firstName, lastName, password, companyId, floor } = req.body;
-  validateCreateUser(req.body);
+async function hashPassword(password) {
+  return await bcrypt.hash(password, 10);
+}
 
+async function validatePassword(plainPassword, hashedPassword) {
+  return await bcrypt.compare(plainPassword, hashedPassword);
+}
+
+const createUser = async (req, res, next) => {
   try {
-    const userExist = await User.findOne({ email });
-    if (userExist) {
-      const err = new Error('User already exists.');
-      err.code = 400;
-      res.status(400).send(err);
-    }
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const user = new User({
+    const {
+      email,
+      firstName,
+      lastName,
+      password,
+      companyId,
+      floor,
+      role,
+    } = req.body;
+    const hashedPassword = await hashPassword(password);
+    const newUser = new User({
       firstName,
       lastName,
       email,
       password: hashedPassword,
       companyId,
       floor,
+      role,
     });
-    const savedUser = await user.save();
-    res.status(200).send(savedUser);
-  } catch (err) {
-    console.error(err);
-    err.code = 400;
-    res.status(400).send(err);
+
+    const accessToken = jwt.sign(
+      { userId: newUser._id },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '1d',
+      }
+    );
+
+    newUser.accessToken = accessToken;
+    await newUser.save();
+    res.json({
+      data: newUser,
+      accessToken,
+    });
+  } catch (error) {
+    res.send(error.message);
   }
 };
 
 const login = async (req, res, next) => {
-  const { password, email } = req.body;
-  validateLogin(email);
-
   try {
+    const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user) {
-      const err = new Error('User with this credential not found');
-      err.conde = 404;
-      throw err;
-    }
-    await validatePassword(password, user.password);
-    const token = jwt.sign({ userId: user._id, email }, 'securetext', {
-      expiresIn: '12h',
+    if (!user) return next(new Error('Email does not exist'));
+    const validPassword = await validatePassword(password, user.password);
+    if (!validPassword) return next(new Error('Password is not correct'));
+    const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '1d',
     });
-    const loginUser = {
-      userId: user._id,
-      token,
-      tokenExp: 12,
-    };
-    res.status(200).send(loginUser);
-  } catch (err) {
-    console.error(err);
-    //throw err; - why should we throw here?
-    res.send(err);
+    await User.findByIdAndUpdate(user._id, { accessToken });
+    res.status(200).json({
+      data: { email: user.email, role: user.role },
+      accessToken,
+    });
+  } catch (error) {
+    res.send(error.message);
+  }
+};
+
+// Add this to the top of the file
+const { roles } = require('../roles');
+
+const grantAccess = (action, resource) => {
+  return async (req, res, next) => {
+    try {
+      const permission = roles.can(req.user.role)[action](resource);
+      if (!permission.granted) {
+        return res.status(401).json({
+          error: "You don't have enough permission to perform this action",
+        });
+      }
+      next();
+    } catch (error) {
+      next(error);
+    }
+  };
+};
+
+const allowIfLoggedin = async (req, res, next) => {
+  try {
+    const user = res.locals.loggedInUser;
+    if (!user)
+      return res.status(401).json({
+        error: 'You need to be logged in to access this route',
+      });
+    req.user = user;
+    next();
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -185,4 +229,6 @@ module.exports = {
   login,
   createUser,
   deleteVisitedRooms,
+  allowIfLoggedin,
+  grantAccess,
 };
