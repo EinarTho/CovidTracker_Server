@@ -185,10 +185,7 @@ const login = async (req, res, next) => {
       expiresIn: '1d',
     });
     await User.findByIdAndUpdate(user._id, { accessToken });
-    res.status(200).json({
-      data: user,
-      accessToken,
-    });
+    res.status(200).json(user);
   } catch (error) {
     res.send(error.message);
   }
