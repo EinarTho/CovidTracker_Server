@@ -41,11 +41,12 @@ const getAllUsers = async (req, res) => {
 //need to do more validation - not nessarily statuscode 500
 const addVisitedRooms = async (req, res) => {
   try {
-    const roomsToBeAdded = JSON.parse(req.body.rooms);
+    const roomsToBeAdded = req.body.rooms;
     if (!validateRoomArray(roomsToBeAdded)) {
       return res.status(415).send('Rooms in wrong format');
     }
     const user = await User.findOne({ _id: req.body._id });
+
     if (!user) return res.status(400).send('No user with the provided ID');
     user.visits.push(...roomsToBeAdded);
     await user.save();
@@ -72,7 +73,7 @@ const deleteVisitedRooms = async (req, res) => {
     const user = await User.findOne({ _id: req.body._id });
     if (!user) return res.status(400).send('No user with the provided id');
     const filteredRooms = user.visits.filter(
-      room => !roomsToBeDeleted.includes(room.id)
+      (room) => !roomsToBeDeleted.includes(room.id)
     );
     user.visits = filteredRooms;
     await user.save();
@@ -88,7 +89,7 @@ const registerPositiveTest = async (req, res) => {
     const positiveUser = await User.findOne({ _id: req.body._id });
     if (!positiveUser)
       return res.status(400).send('No user with the provided id');
-    const usersInRisk = allUsers.filter(user => {
+    const usersInRisk = allUsers.filter((user) => {
       console.log('first: ' + positiveUser._id, 'second' + user._id);
       if (JSON.stringify(positiveUser._id) === JSON.stringify(user._id)) {
         return false;
@@ -98,7 +99,7 @@ const registerPositiveTest = async (req, res) => {
         JSON.parse(JSON.stringify(positiveUser.visits))
       );
     });
-    const usersToBeWarned = usersInRisk.map(user => user._id);
+    const usersToBeWarned = usersInRisk.map((user) => user._id);
     await User.updateMany(
       {
         _id: {
