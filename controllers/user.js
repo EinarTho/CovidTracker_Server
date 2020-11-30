@@ -126,6 +126,7 @@ async function validatePassword(plainPassword, hashedPassword) {
 }
 
 const createUser = async (req, res, next) => {
+  console.log('about to  make a user!');
   try {
     const {
       email,
@@ -136,6 +137,12 @@ const createUser = async (req, res, next) => {
       floor,
       role,
     } = req.body;
+    const existingUser = await User.findOne({ email: email });
+    console.log(existingUser);
+    if (existingUser) {
+      throw new Error('A user with that email already exists');
+    }
+    console.log(req.body);
     const hashedPassword = await hashPassword(password);
     const newUser = new User({
       firstName,
@@ -168,6 +175,7 @@ const createUser = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   try {
+    console.log(req.body, 'lloooooooogin');
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) return next(new Error('Email does not exist'));
@@ -178,7 +186,7 @@ const login = async (req, res, next) => {
     });
     await User.findByIdAndUpdate(user._id, { accessToken });
     res.status(200).json({
-      data: { email: user.email, role: user.role },
+      data: user,
       accessToken,
     });
   } catch (error) {
@@ -195,7 +203,7 @@ const grantAccess = (action, resource) => {
       const permission = roles.can(req.user.role)[action](resource);
       if (!permission.granted) {
         return res.status(401).json({
-          error: "You don't have enough permission to perform this action",
+          error: "You don't have enough permissions to perform this action",
         });
       }
       next();
