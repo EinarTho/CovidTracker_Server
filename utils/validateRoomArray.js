@@ -1,6 +1,6 @@
 const validateRoomArray = roomArray => {
   for (let i = 0; i < roomArray.length; i++) {
-    if (!roomArray[i].date || !roomArray[i].time || !roomArray[i].id) {
+    if (!roomArray[i].date || !roomArray[i].time || !roomArray[i]._id) {
       return false;
     }
   }

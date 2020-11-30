@@ -83,6 +83,7 @@ const deleteVisitedRooms = async (req, res) => {
 };
 
 const registerPositiveTest = async (req, res) => {
+  console.log(req.body);
   try {
     const allUsers = await User.find({});
     const positiveUser = await User.findOne({ _id: req.body._id });
