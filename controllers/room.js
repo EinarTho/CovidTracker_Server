@@ -5,8 +5,9 @@ const roomArrayValidator = require('../utils/roomArrayValidator');
 //need a validator for content
 
 const createRooms = async (req, res) => {
+  console.log('In create Rooms');
   try {
-    const roomArray = JSON.parse(req.body.rooms);
+    const roomArray = req.body.rooms;
     if (!roomArrayValidator(roomArray)) {
       return res.status(415).send('One of the rooms are in the wrong format');
     }
@@ -27,8 +28,10 @@ const getAllRooms = async (req, res) => {
 };
 
 const deleteRooms = async (req, res) => {
+  console.log('in DeleteRooms');
+  console.log(req.body);
   try {
-    const roomsToBeDeleted = JSON.parse(req.body.rooms); //validation - check if the rooms exist
+    const roomsToBeDeleted = req.body.rooms; //validation - check if the rooms exist
     await Room.deleteMany({
       _id: {
         $in: roomsToBeDeleted,
@@ -44,7 +47,7 @@ const deleteRooms = async (req, res) => {
 //is doing it like this problematic?
 const updateRooms = async (req, res) => {
   try {
-    const roomsToBeUpdated = JSON.parse(req.body.rooms);
+    const roomsToBeUpdated = req.body.rooms;
     if (!roomArrayValidator(roomsToBeUpdated)) {
       return res.status(415).send('invalid content');
     }
