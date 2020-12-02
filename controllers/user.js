@@ -99,6 +99,9 @@ const registerPositiveTest = async (req, res) => {
       );
     });
     const usersToBeWarned = usersInRisk.map(user => user._id);
+    usersToBeWarned.push(positiveUser._id);
+    positiveUser.inRisk = true;
+    console.log(usersToBeWarned);
     await User.updateMany(
       {
         _id: {
@@ -110,11 +113,7 @@ const registerPositiveTest = async (req, res) => {
         dateOfContact: new Date().toDateString(),
       }
     );
-    res
-      .status(200)
-      .send(
-        'The users with the following ids will be warned: ' + usersToBeWarned
-      );
+    res.status(200).send(positiveUser);
   } catch (e) {
     res.status(500).send(e.message);
   }
