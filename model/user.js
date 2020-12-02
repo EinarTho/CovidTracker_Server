@@ -36,6 +36,9 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    dateOfContact: {
+      type: String,
+    },
     role: {
       type: String,
       default: 'basic',

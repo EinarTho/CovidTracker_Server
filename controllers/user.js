@@ -60,7 +60,7 @@ const getVisitedRooms = async (req, res) => {
   try {
     const user = await User.findOne({ _id: req.body._id });
     if (!user) return res.status(400).send('no user with that id!');
-    res.status(200).send(user.visits);
+    res.status(200).send(user.visits); //change this?
   } catch (e) {
     res.status(500).send(e.message);
   }
@@ -73,7 +73,7 @@ const deleteVisitedRooms = async (req, res) => {
     const user = await User.findOne({ _id: req.body._id });
     if (!user) return res.status(400).send('No user with the provided id');
     const filteredRooms = user.visits.filter(
-      (room) => !roomsToBeDeleted.includes(room.id)
+      room => !roomsToBeDeleted.includes(room.id)
     );
     user.visits = filteredRooms;
     await user.save();
@@ -89,7 +89,7 @@ const registerPositiveTest = async (req, res) => {
     const positiveUser = await User.findOne({ _id: req.body._id });
     if (!positiveUser)
       return res.status(400).send('No user with the provided id');
-    const usersInRisk = allUsers.filter((user) => {
+    const usersInRisk = allUsers.filter(user => {
       console.log('first: ' + positiveUser._id, 'second' + user._id);
       if (JSON.stringify(positiveUser._id) === JSON.stringify(user._id)) {
         return false;
@@ -99,14 +99,17 @@ const registerPositiveTest = async (req, res) => {
         JSON.parse(JSON.stringify(positiveUser.visits))
       );
     });
-    const usersToBeWarned = usersInRisk.map((user) => user._id);
+    const usersToBeWarned = usersInRisk.map(user => user._id);
     await User.updateMany(
       {
         _id: {
           $in: usersToBeWarned,
         },
       },
-      { inRisk: true }
+      {
+        inRisk: true,
+        dateOfContact: new Date().toDateString(),
+      }
     );
     res
       .status(200)
