@@ -68,16 +68,18 @@ const getVisitedRooms = async (req, res) => {
 
 const deleteVisitedRooms = async (req, res) => {
   try {
+    console.log(req.body);
     const roomsToBeDeleted = req.body.rooms;
-    console.log(roomsToBeDeleted);
+    console.log(roomsToBeDeleted, 'rooms to be deleted');
+    console.log(req.body._id, 'id should be heredvsvs');
     const user = await User.findOne({ _id: req.body._id });
     if (!user) return res.status(400).send('No user with the provided id');
     const filteredRooms = user.visits.filter(
-      room => !roomsToBeDeleted.includes(room.id)
+      room => !roomsToBeDeleted.includes(room._id)
     );
     user.visits = filteredRooms;
     await user.save();
-    res.status(200).send('You deleted some rooms for a user');
+    res.status(200).send(user);
   } catch (e) {
     res.status(500).send(e.message);
   }
@@ -91,9 +93,6 @@ const registerPositiveTest = async (req, res) => {
       return res.status(400).send('No user with the provided id');
     const usersInRisk = allUsers.filter(user => {
       console.log('first: ' + positiveUser._id, 'second' + user._id);
-      if (JSON.stringify(positiveUser._id) === JSON.stringify(user._id)) {
-        return false;
-      }
       return findMatchingEntries(
         JSON.parse(JSON.stringify(user.visits)),
         JSON.parse(JSON.stringify(positiveUser.visits))

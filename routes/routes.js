@@ -35,12 +35,7 @@ router.get(
   userController.getVisitedRooms
 );
 
-router.delete(
-  '/users/visitedrooms',
-  userController.allowIfLoggedin,
-  userController.grantAccess('updateAny', 'profile'),
-  userController.deleteVisitedRooms
-);
+router.put('/users/deletevisitedrooms', userController.deleteVisitedRooms);
 
 router.post('/users/register', userController.createUser);
 
