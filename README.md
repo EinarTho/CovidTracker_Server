@@ -6,7 +6,10 @@ Live API deployed on Heroku - [Live API](https://novid-backend.herokuapp.com/api
 | This project was made and deveoped as a final MVP product during two final weeks at Salt. 
 
 ## DATA MODELS
-picpicpic
+### User Collection
+![UserCollection](/UserCollection.png)
+### Room Collection
+![RoomCollection](/RoomCollection.png)
 
 ## ABOUT NOVID
 Visit - [CovidTracker_Client](https://github.com/Ryjekk/CovidTracker_Client)
